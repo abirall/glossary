@@ -1,13 +1,27 @@
-version: "3.3"
+version: "3.8"
 
 services:
-
-  site:
-    image: docsy/docsy-example
+  # Production: build static site with Hugo builder, then serve with nginx
+  web:
     build:
       context: .
-    command: server
+      dockerfile: Dockerfile
+      target: final
+    image: glossary:prod
+    container_name: glossary_web
     ports:
-      - "1313:1313"
+      - "8080:8080"
+    restart: unless-stopped
+
+  # Dev: run Hugo server with live reload (mount code for editing)
+  dev:
+    image: klakegg/hugo:ext-alpine
+    container_name: glossary_dev
+    working_dir: /site
     volumes:
-      - .:/src
+      - ./:/site:cached
+    ports:
+      - "1313:1313"   # hugo default dev port
+    command: >
+      sh -c "apk add --no-cache git && git submodule update --init --recursive && hugo server --bind 0.0.0.0 --buildDrafts --buildFuture --disableFastRender -D"
+
