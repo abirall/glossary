@@ -12,7 +12,7 @@ metadata:
   labels:
     app: glossary
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: glossary
@@ -22,17 +22,11 @@ spec:
         app: glossary
     spec:
       containers:
-        - name: glossary
-          image: glossary:prod
-          ports:
-            - containerPort: 8080
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
+      - name: glossary
+        image: glossary:prod
+        ports:
+        - containerPort: 8080
+
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
