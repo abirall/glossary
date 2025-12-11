@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glossary
+  labels:
+    app: glossary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glossary
+  template:
+    metadata:
+      labels:
+        app: glossary
+    spec:
+      containers:
+        - name: glossary
+          image: glossary:prod
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: glossary-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: glossary
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glossary
+  labels:
+    app: glossary
+spec:
+  type: NodePort
+  selector:
+    app: glossary
+  ports:
+    - name: http
+      port: 8080        
+      targetPort: 8080  
+      nodePort: 31002   
+
+
